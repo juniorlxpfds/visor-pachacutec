@@ -49,7 +49,7 @@ function onEachFeature(feature, layer) {
 }
 
 // --- Cargar Perímetro ---
-fetch('Nueva%20carpeta/perimetro.geojson')
+fetch('datos/perimetro.geojson')
   .then(res => res.json())
   .then(data => {
     L.geoJSON(data, {
@@ -59,7 +59,7 @@ fetch('Nueva%20carpeta/perimetro.geojson')
   });
 
 // --- Cargar Vías ---
-fetch('Nueva%20carpeta/vias.geojson')
+fetch('datos/vias.geojson')
   .then(res => res.json())
   .then(data => {
     L.geoJSON(data, {
@@ -69,7 +69,7 @@ fetch('Nueva%20carpeta/vias.geojson')
   });
 
 // --- Cargar Lotes ---
-fetch('Nueva%20carpeta/lotes.geojson')
+fetch('datos/lotes.geojson')
   .then(res => res.json())
   .then(data => {
     L.geoJSON(data, {
