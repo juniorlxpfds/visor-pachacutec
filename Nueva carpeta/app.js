@@ -1,97 +1,63 @@
-// Inicialización del mapa
-var map = L.map('map').setView([-11.862, -77.141], 15);
+// Inicializar mapa centrado en Pachacutec Ventanilla
+var map = L.map('map').setView([-11.860, -77.144], 15);
 
 // Capas base
 var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap contributors'
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
 var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  attribution: 'Tiles © Esri'
+  attribution: 'Tiles &copy; Esri'
 });
 
-// Capas
-var capaVias = L.geoJSON(null, {
-  style: {
-    color: '#555',
-    weight: 1.5
-  }
-}).addTo(map);
-
-var capaLotes = L.geoJSON(null, {
-  style: function(feature) {
-    return {
-      color: '#228B22',
-      weight: 1,
-      fillOpacity: 0.5
-    };
-  },
-  onEachFeature: function(feature, layer) {
-    layer.on({
-      click: function(e) {
-        var props = feature.properties;
-        var contenido = '<h4>Información del Lote</h4>';
-        for (var key in props) {
-          contenido += key + ': ' + props[key] + '<br>';
-        }
-        layer.bindPopup(contenido).openPopup();
-      }
-    });
-  }
-}).addTo(map);
-
-var capaPerimetro = L.geoJSON(null, {
-  style: {
-    color: '#FF0000',
-    weight: 2,
-    fillOpacity: 0
-  }
-}).addTo(map);
-
-// Control de capas
+// Control de capas base
 var baseMaps = {
   "OpenStreetMap": osm,
-  "Satélite Esri": esriSat
+  "Satélite": esriSat
 };
-var overlayMaps = {
-  "Vías": capaVias,
-  "Lotes / Manzanas": capaLotes,
-  "Perímetro": capaPerimetro
-};
-L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-// Geocoder
-if (typeof L.Control.Geocoder !== 'undefined') {
-  L.Control.geocoder({
-    defaultMarkGeocode: true
-  }).addTo(map);
+// --- Función para resaltar al pasar el mouse ---
+function highlightFeature(e) {
+  var layer = e.target;
+  layer.setStyle({
+    weight: 3,
+    color: '#666',
+    dashArray: '',
+    fillOpacity: 0.7
+  });
 }
 
-// Leyenda
-var legend = L.control({ position: 'bottomright' });
-legend.onAdd = function () {
-  var div = L.DomUtil.create('div', 'info legend');
-  div.innerHTML = '<strong>Capas</strong><br>' +
-                  '<i style="background: #555; width:10px; height:2px; display:inline-block;"></i> Vías<br>' +
-                  '<i style="background: #228B22; width:10px; height:10px; display:inline-block;"></i> Lotes / Manzanas<br>' +
-                  '<i style="border:2px solid #FF0000; width:0; height:0; display:inline-block;"></i> Perímetro';
-  return div;
-};
-legend.addTo(map);
-
-// Función para cargar GeoJSON
-function cargarGeoJSON(url, capa) {
-  fetch(url)
-    .then(response => response.json())
-    .then(data => {
-      capa.addData(data);
-    })
-    .catch(err => {
-      console.error('Error cargando ' + url + ': ' + err);
-    });
+// --- Función para resetear estilo ---
+function resetHighlight(e) {
+  geojson.resetStyle(e.target);
 }
 
-// Cargar archivos
-cargarGeoJSON('vias.geojson', capaVias);
-cargarGeoJSON('lotes.geojson', capaLotes);
-cargarGeoJSON('perimetro.geojson', capaPerimetro);
+// --- Función onEachFeature ---
+function onEachFeature(feature, layer) {
+  let props = feature.properties;
+  let content = '<b>Información:</b><br>';
+  for (let key in props) {
+    content += `${key}: ${props[key]}<br>`;
+  }
+  layer.bindPopup(content);
+
+  layer.on({
+    mouseover: highlightFeature,
+    mouseout: resetHighlight
+  });
+}
+
+// --- Cargar Perímetro ---
+fetch('Nueva%20carpeta/perimetro.geojson')
+  .then(res => res.json())
+  .then(data => {
+    L.geoJSON(data, {
+      style: { color: 'red', weight: 2, fillOpacity: 0 },
+      onEachFeature: onEachFeature
+    }).addTo(map);
+  });
+
+// --- Cargar Vías ---
+fetch('Nueva%20carpeta/vias.geojson')
+  .then(res => res.json())
