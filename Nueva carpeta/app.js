@@ -92,5 +92,10 @@ legend.onAdd = function (map) {
   div.innerHTML += '<i style="background:green; width:18px; height:18px; float:left; margin-right:8px; opacity:0.3; border:1px solid green;"></i> Lotes<br>';
   return div;
 };
-
 legend.addTo(map);
+
+// --- CONTROL DE BÚSQUEDA DE DIRECCIONES ---
+L.Control.geocoder({
+  defaultMarkGeocode: true,
+  position: 'topleft'
+}).addTo(map);
