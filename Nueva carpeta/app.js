@@ -61,3 +61,36 @@ fetch('Nueva%20carpeta/perimetro.geojson')
 // --- Cargar Vías ---
 fetch('Nueva%20carpeta/vias.geojson')
   .then(res => res.json())
+  .then(data => {
+    L.geoJSON(data, {
+      style: { color: 'blue', weight: 2 },
+      onEachFeature: onEachFeature
+    }).addTo(map);
+  });
+
+// --- Cargar Lotes ---
+fetch('Nueva%20carpeta/lotes.geojson')
+  .then(res => res.json())
+  .then(data => {
+    L.geoJSON(data, {
+      style: { color: 'green', weight: 1, fillOpacity: 0.3 },
+      onEachFeature: onEachFeature
+    }).addTo(map);
+  });
+
+// Control de capas
+L.control.layers(baseMaps, {}).addTo(map);
+
+// --- LEYENDA PERSONALIZADA ---
+var legend = L.control({ position: 'bottomright' });
+
+legend.onAdd = function (map) {
+  var div = L.DomUtil.create('div', 'info legend');
+  div.innerHTML += '<h4>Leyenda</h4>';
+  div.innerHTML += '<i style="background:red; width:18px; height:18px; float:left; margin-right:8px; opacity:0.7;"></i> Perímetro<br>';
+  div.innerHTML += '<i style="background:blue; width:18px; height:3px; display:inline-block; margin-right:8px; opacity:0.7;"></i> Vías<br>';
+  div.innerHTML += '<i style="background:green; width:18px; height:18px; float:left; margin-right:8px; opacity:0.3; border:1px solid green;"></i> Lotes<br>';
+  return div;
+};
+
+legend.addTo(map);
